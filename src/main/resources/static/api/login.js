@@ -1,14 +1,24 @@
 function loginApi(data) {
   return $axios({
-    'url': '/employee/login',
+    'url': '/user/login',
     'method': 'post',
     data
   })
 }
 
+/**
+ * 获取验证码
+ */
+function getCodeImg(){
+  return $axios({
+    'url': '/wllz/captchaImage',
+    'method': 'get',
+  })
+}
+
 function logoutApi(){
   return $axios({
-    'url': '/employee/logout',
+    'url': '/user/logout',
     'method': 'post',
   })
 }
