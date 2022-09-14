@@ -1,4 +1,4 @@
-function loginApi(data) {
+function login(data) {
   return $axios({
     'url': '/user/login',
     'method': 'post',
@@ -11,12 +11,12 @@ function loginApi(data) {
  */
 function getCodeImg(){
   return $axios({
-    'url': '/wllz/captchaImage',
+    'url': '/captchaImage',
     'method': 'get',
   })
 }
 
-function logoutApi(){
+function logout(){
   return $axios({
     'url': '/user/logout',
     'method': 'post',

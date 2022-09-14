@@ -1,7 +1,6 @@
 package cn.edu.svtcc.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 
 public class User extends BaseEntity{

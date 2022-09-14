@@ -94,4 +94,9 @@ public class Constants
      * 令牌前缀
      */
     public static final String LOGIN_USER_KEY = "login_user_key";
+
+    /**
+     * 验证码Session Key
+     */
+    public static final String CAPTCHA_CODE_SESSION_KEY="kaptcha_code";
 }
