@@ -29,7 +29,6 @@ public class UserController {
          * 3.判断用户状态
          * 4.判断验证码
          * */
-        System.out.println(Md5Utils.hash("123456"));
         //1.根据用户名查询用户信息
         QueryWrapper<User> queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("user_name", userVO.getUserName());
@@ -56,6 +55,7 @@ public class UserController {
         if(!captchaCode.equals(userVO.getCode())){
             return AjaxResult.error("验证码错误");
         }
+        ajax.put("data",user);
         return ajax;
     }
 

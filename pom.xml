@@ -11,16 +11,11 @@
     <groupId>cn.edu.svtcc</groupId>
     <artifactId>SpringBoot-Demo-Wllz</artifactId>
     <version>1.0.0.0</version>
-    <name>SpringBoot-Demo-Wllz</name>
-    <description>SpringBoot-Demo-Wllz</description>
+
     <properties>
         <java.version>1.8</java.version>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -32,7 +27,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!--mybatis-puls-起步依赖-->
+        <!--mybatis-plus-起步依赖-->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
@@ -51,12 +46,13 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
-        <!--数据库连接池-->
+        <!--druid数据库连接池起步依赖-->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
             <version>1.2.8</version>
         </dependency>
+
         <!--验证码-->
         <dependency>
             <groupId>com.github.penggle</groupId>
@@ -64,7 +60,6 @@
             <version>2.3.2</version>
         </dependency>
 
-        <!--常用工具类 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
