@@ -229,12 +229,13 @@
 /*  color: #ffffff !important;*/
 /*}*/
 
-/*.el-menu .el-menu-item:active {*/
-/*  color: #333333 !important;*/
-/*  background-color: transparent !important;*/
+/*.el-menu .el-menu-item.active {*/
+/*  color: #409eff !important;*/
+/*  !*background-color: transparent !important;*!*/
 /*}*/
-/*.el-menu .el-menu-item:active span {*/
-/*  color: #333333 !important;*/
+
+/*.el-menu .el-menu-item.active span {*/
+/*  color: #409eff !important;*/
 /*}*/
 
 /*.el-menu .el-menu-item.is-active {*/

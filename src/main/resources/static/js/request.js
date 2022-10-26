@@ -9,11 +9,6 @@
   })
   // request拦截器
   service.interceptors.request.use(config => {
-    // 是否需要设置 token
-    // const isToken = (config.headers || {}).isToken === false
-    // if (getToken() && !isToken) {
-    //   config.headers['Authorization'] = 'Bearer ' + getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
-    // }
     // get请求映射params参数
     if (config.method === 'get' && config.params) {
       let url = config.url + '?';
@@ -45,9 +40,8 @@
   // 响应拦截器
   service.interceptors.response.use(res => {
       if (res.data.code === 0 && res.data.msg === 'NOTLOGIN') {// 返回登录页面
-        console.log('---/backend/page/login/login.html---')
         localStorage.removeItem('userInfo')
-        window.top.location.href = '/backend/page/login/login.html'
+        window.top.location.href = '/login.html'
       } else {
         return res.data
       }

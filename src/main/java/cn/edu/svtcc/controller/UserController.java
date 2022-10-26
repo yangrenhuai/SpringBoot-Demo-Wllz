@@ -7,6 +7,7 @@ import cn.edu.svtcc.entity.User;
 import cn.edu.svtcc.entity.vo.UserVO;
 import cn.edu.svtcc.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
+@Slf4j
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -63,6 +65,18 @@ public class UserController {
     public AjaxResult logout(HttpServletRequest request){
         AjaxResult ajax=AjaxResult.success();
         request.getSession().removeAttribute(Constants.CAPTCHA_CODE_SESSION_KEY);
+        return ajax;
+    }
+
+    /**
+     * 新增用户
+     * @param user
+     * @return
+     */
+    @PostMapping
+    public AjaxResult add(@RequestBody User user){
+        AjaxResult ajax=AjaxResult.success();
+        log.info("新增用户，信息为：{}",user);
         return ajax;
     }
 }

@@ -1,206 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>网络理政系统</title>
-    <link rel="shortcut icon" href="favicon.ico">
-    <!-- 引入样式 -->
-    <link rel="stylesheet" href="../plugins/element-ui/index.css"/>
-    <link rel="stylesheet" href="../styles/common.css"/>
-    <link rel="stylesheet" href="../styles/index.css"/>
-    <link rel="stylesheet" href="../styles/icon/iconfont.css"/>
-    <style>
-        .body {
-            min-width: 1366px;
-        }
+    <head>
+        <meta charset="UTF-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>网络理政系统</title>
+        <link rel="shortcut icon" href="favicon.ico">
+        <!-- 引入样式 -->
+        <link rel="stylesheet" href="../plugins/element-ui/index.css"/>
+        <link rel="stylesheet" href="../styles/common.css"/>
+        <link rel="stylesheet" href="../styles/index.css"/>
+        <link rel="stylesheet" href="../styles/icon/iconfont.css"/>
+        <style>
+            .body {
+                min-width: 1366px;
+            }
 
-        .app-main {
-            height: calc(100% - 64px);
-        }
+            .app-main {
+                height: calc(100% - 64px);
+            }
 
-        .app-main .divTmp {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
-</head>
+            .app-main .divTmp {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
 
-<body>
-<div class="app" id="app">
-    <div class="app-wrapper openSidebar clearfix">
-        <!-- sidebar -->
-        <div class="sidebar-container">
-            <div class="logo">
-                <img src="../images/index-logo.png" alt="" style="height: 100px"/>
-            </div>
-            <el-scrollbar wrap-class="scrollbar-wrapper">
-                <el-menu default-active="2" background-color="#333333" text-color="#fff"
-                         :unique-opened="true">
-                    <el-submenu :index="item.id" v-for="item in menuList" :key="item.id"
-                                v-if="item.children && item.children.length>0">
-                        <template slot="title">
-                            <i class="el-icon-location"></i>
-                            <span>{{item.name}}</span>
-                        </template>
-                        <el-menu-item-group>
-                            <el-menu-item v-for="item in item.children" @click="handleMenuSelect(item)">
-                                <template slot="title">
-                                    <i :class="item.icon"></i>
-                                    <span slot="title">{{item.name}}</span>
-                                </template>
-                            </el-menu-item>
-                        </el-menu-item-group>
-                    </el-submenu>
-                    <el-menu-item  v-for="item in menuList" :index="item.id" :key="item.id"
-                                    v-if="item.children==undefined" @click="handleMenuSelect(item)">
-                        <template slot="title">
-                            <i :class="item.icon"></i>
-                            <span slot="title">{{item.name}}</span>
-                        </template>
-                    </el-menu-item>
-                </el-menu>
-            </el-scrollbar>
-        </div>
-        <div class="main-container">
-            <!-- <navbar /> -->
-            <div class="navbar">
-                <div class="head-lable">
-                    <span>{{headTitle}}</span>
+    <body>
+        <div class="app" id="app">
+            <div class="app-wrapper openSidebar clearfix">
+                <!-- sidebar -->
+                <div class="sidebar-container">
+                    <div class="logo">
+                        <img src="../images/index-logo.png" alt="" style="height: 100px"/>
+                    </div>
+                    <el-scrollbar wrap-class="scrollbar-wrapper">
+                        <el-menu :default-active="menuActived" background-color="#333333" text-color="#fff" :unique-opened="true"
+                                 active-text-color="#409eff">
+                            <div v-for="item in menuList">
+                                <el-submenu :index="item.id" v-if="item.children!=undefined">
+                                    <template slot="title">
+                                        <i class="el-icon-location"></i>
+                                        <span>{{item.name}}</span>
+                                    </template>
+                                    <el-menu-item-group>
+                                        <el-menu-item  :index="item.id"  @click="handleMenuSelect(item)" v-for="item in item.children">
+                                            <template slot="title">
+                                                <i :class="item.icon"></i>
+                                                <span slot="title">{{item.name}}</span>
+                                            </template>
+                                        </el-menu-item>
+                                    </el-menu-item-group>
+                                </el-submenu>
+                                <el-menu-item v-else :index="item.id" @click="handleMenuSelect(item)">
+                                    <template slot="title">
+                                        <i :class="item.icon"></i>
+                                        <span slot="title">{{item.name}}</span>
+                                    </template>
+                                </el-menu-item>
+                            </div>
+                        </el-menu>
+                    </el-scrollbar>
                 </div>
-                <div class="right-menu">
-                    <div class="avatar-wrapper">{{ userInfo.realName }}</div>
-                    <img src="../images/icons/btn_close@2x.png" class="outLogin" alt="退出" @click="handleLogout"/>
+                <div class="main-container">
+                    <!-- <navbar /> -->
+                    <div class="navbar">
+                        <div class="head-lable">
+                            <span>{{headTitle}}</span>
+                        </div>
+                        <div class="right-menu">
+                            <div class="avatar-wrapper">{{ userInfo.realName }}</div>
+                            <img src="../images/icons/btn_close@2x.png" class="outLogin" alt="退出"
+                                 @click="handleLogout"/>
+                        </div>
+                    </div>
+                    <div class="app-main" v-loading="loading">
+                        <div class="divTmp" v-show="loading"></div>
+                        <iframe id="cIframe" class="c_iframe" name="cIframe" :src="iframeUrl" width="100%" height="auto"
+                                frameborder="0" v-show="!loading"></iframe>
+                    </div>
                 </div>
             </div>
-            <div class="app-main" v-loading="loading">
-                <div class="divTmp" v-show="loading"></div>
-                <iframe id="cIframe" class="c_iframe" name="cIframe" :src="iframeUrl" width="100%"
-                        height="auto" frameborder="0" v-show="!loading"></iframe>
-            </div>
         </div>
-    </div>
-</div>
-<!-- 开发环境版本，包含了有帮助的命令行警告 -->
-<script src="../plugins/vue/vue.js"></script>
-<!-- 引入组件库 -->
-<script src="../plugins/element-ui/index.js"></script>
-<!-- 引入axios -->
-<script src="../plugins/axios/axios.min.js"></script>
-<script src="../js/request.js"></script>
-<script src="../api/login.js"></script>
-<script>
-    new Vue({
-        el: '#app',
-        data() {
-            return {
-                defAct: '4',
-                menuActived: '4',
-                userInfo: {},
-                menuList: [
-                    {
-                        id: '1',
-                        name: '投诉管理',
-                        children: [
+        <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+        <script src="../plugins/vue/vue.js"></script>
+        <!-- 引入组件库 -->
+        <script src="../plugins/element-ui/index.js"></script>
+        <!-- 引入axios -->
+        <script src="../plugins/axios/axios.min.js"></script>
+        <script src="../js/request.js"></script>
+        <script>
+            new Vue({
+                el: '#app',
+                data() {
+                    return {
+                        menuActived: "5",
+                        userInfo: {},
+                        menuList: [
                             {
-                                id: '1-1',
+                                id: '1',
                                 name: '投诉管理',
-                                url: 'page/member/list.html',
-                                icon: 'el-icon-edit'
+                                icon: 'el-icon-setting',
+                                children: [
+                                    {
+                                        id: '1-1',
+                                        name: '投诉管理',
+                                        url: 'page/member/list.html',
+                                        icon: 'el-icon-edit'
+                                    },
+                                    {
+                                        id: '1-2',
+                                        name: '催办通知',
+                                        url: '',
+                                        icon: 'el-icon-chat-line-square'
+                                    }
+                                ]
                             },
                             {
-                                id:'1-2',
-                                name:'催办通知',
-                                url:'',
-                                icon:'el-icon-chat-line-square'
+                                id: '2',
+                                name: '通知管理',
+                                url: 'page/category/list.html',
+                                icon: 'el-icon-chat-square'
+                            },
+                            {
+                                id: '4',
+                                name: '系统管理',
+                                icon: 'el-icon-setting',
+                                children: [
+                                    {
+                                        id: '5',
+                                        name: '用户管理',
+                                        icon: 'el-icon-user',
+                                        url: 'user/list.html'
+                                    },
+                                    {
+                                        id: '6',
+                                        name: '角色管理',
+                                        icon: 'el-icon-s-custom',
+                                        url: ''
+                                    },
+                                    {
+                                        id: '7',
+                                        name: '部门管理',
+                                        icon: 'el-icon-office-building',
+                                        url: ''
+                                    },
+                                    {
+                                        id: '8',
+                                        name: '菜单管理',
+                                        icon: 'el-icon-menu',
+                                        url: 'menu/list.html'
+                                    }
+                                ]
                             }
-                        ]
-                    },
-                    {
-                        id: '2',
-                        name: '通知管理',
-                        url: 'page/category/list.html',
-                        icon: 'el-icon-chat-square'
-                    },
-                    {
-                        id: '4',
-                        name: '系统管理',
-                        icon: 'el-icon-setting',
-                        children: [
-                            {
-                                id:'5',
-                                name:'用户管理',
-                                icon: 'el-icon-user',
-                                url:''
-                            },
-                            {
-                                id:'6',
-                                name:'角色管理',
-                                icon: 'el-icon-s-custom',
-                                url:''
-                            },
-                            {
-                                id:'7',
-                                name:'部门管理',
-                                icon:'el-icon-office-building',
-                                url:''
-                            },
-                            {
-                                id:'8',
-                                name:'菜单管理',
-                                icon:'el-icon-menu',
-                                url:'menu/list.html'
+                        ],
+                        iframeUrl: 'user/list.html',
+                        headTitle: '用户管理',
+                        loading: true,
+                        timer: null
+                    }
+                },
+                computed: {},
+                created() {
+                    const userInfo = window.localStorage.getItem('userInfo')
+                    if (userInfo) {
+                        this.userInfo = JSON.parse(userInfo)
+                    }
+                    this.closeLoading()
+                },
+                beforeDestroy() {
+                    this.timer = null
+                    clearTimeout(this.timer)
+                },
+                mounted() {
+                    window.menuHandle = this.menuHandle
+                },
+                methods: {
+                    handleLogout() {
+                        logout().then((res) => {
+                            if (res.code == 200) {
+                                localStorage.removeItem('userInfo')
+                                window.location.href = '../login.html'
                             }
-                        ]
+                        })
+                    },
+                    handleMenuSelect(item) {
+                        this.loading = true
+                        this.menuActived = item.id
+                        this.iframeUrl = item.url
+                        this.headTitle = item.name
+                        // this.goBackFlag = goBackFlag
+                        this.closeLoading()
+                    },
+                    closeLoading() {
+                        this.timer = null
+                        this.timer = setTimeout(() => {
+                            this.loading = false
+                        }, 1000)
                     }
-                ],
-                iframeUrl: 'member/list.html',
-                headTitle: '投诉管理',
-                loading: true,
-                timer: null
-            }
-        },
-        computed: {},
-        created() {
-            const userInfo = window.localStorage.getItem('userInfo')
-            if (userInfo) {
-                this.userInfo = JSON.parse(userInfo)
-            }
-            this.closeLoading()
-        },
-        beforeDestroy() {
-            this.timer = null
-            clearTimeout(this.timer)
-        },
-        mounted() {
-            window.menuHandle = this.menuHandle
-        },
-        methods: {
-            handleLogout() {
-                logout().then((res) => {
-                    if (res.code == 200) {
-                        localStorage.removeItem('userInfo')
-                        window.location.href = '../login.html'
-                    }
-                })
-            },
-            handleMenuSelect(item) {
-                this.loading = true
-                this.menuActived = item.id
-                this.iframeUrl = item.url
-                this.headTitle = item.name
-                // this.goBackFlag = goBackFlag
-                this.closeLoading()
-            },
-            closeLoading() {
-                this.timer = null
-                this.timer = setTimeout(() => {
-                    this.loading = false
-                }, 1000)
-            }
-        }
-    })
-</script>
-</body>
+                }
+            })
+        </script>
+    </body>
 </html>
