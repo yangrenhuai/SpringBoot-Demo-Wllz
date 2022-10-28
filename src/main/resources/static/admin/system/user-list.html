@@ -103,6 +103,7 @@
         <!-- 引入axios -->
         <script src="../../plugins/axios/axios.min.js"></script>
         <script src="../../js/request.js"></script>
+        <script src="../../js/validate.js.js"></script>
         <script src="../../api/user.js"></script>
         <script>
             new Vue({
@@ -145,7 +146,10 @@
                             realName: [{required: true, message: '请输入真实姓名', trigger: 'blur'}],
                             deptId: [{required: true, message: '请选择部门', trigger: 'blur'}],
                             email: [{required: true, message: '请输入电子邮件', trigger: 'blur'}],
-                            phonenumber: [{required: true, message: '请输入手机号', trigger: 'blur'}],
+                            phonenumber: [
+                                {required: true, message: '请输入手机号', trigger: 'blur'},
+                                {validator: checkPhone, trigger: 'blur'}
+                            ],
                             sex: [{required: true, message: '请选择性别', trigger: 'blur'}]
                         }
                     }
@@ -174,7 +178,12 @@
                     },
                     handleQuery() {
                         this.page = 1;
-                        this.init();
+                        console.log("123");
+                        getDeptList(this.queryParams).then(res => {
+                            this.deptList = res.data;
+                        }).catch(err => {
+                            this.$message.error('请求出错了：' + err)
+                        })
                     },
                     // 添加
                     submitAddForm() {

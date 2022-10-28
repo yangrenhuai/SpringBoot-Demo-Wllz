@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>网络理政系统-部门管理</title>
+        <!-- 引入样式 -->
+        <link rel="stylesheet" href="../../plugins/element-ui/index.css"/>
+        <link rel="stylesheet" href="../../plugins/treeselect/treeselect.min.css">
+        <link rel="stylesheet" href="../../styles/common.css"/>
+        <link rel="stylesheet" href="../../styles/page.css"/>
+
+        <style>
+            #user-app .notAdmin::after {
+                border: 0 !important;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="dashboard-container" id="user-app">
+            <div class="container">
+                <div class="tableBar">
+                    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch">
+                        <el-form-item label="部门名称" prop="deptName">
+                            <el-input v-model="queryParams.deptName" placeholder="请输入部门名称" clearable
+                                      @keyup.enter.native="handleQuery"/>
+                        </el-form-item>
+                        <el-form-item label="状态" prop="status">
+                            <el-select v-model="queryParams.status" placeholder="部门状态" clearable>
+                                <el-option key="0" label="正常" value="0"></el-option>
+                                <el-option key="1" label="停用" value="1"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索
+                            </el-button>
+                            <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+                        </el-form-item>
+                    </el-form>
+
+                    <el-row :gutter="10" class="mb8">
+                        <el-col :span="1.5">
+                            <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd">新增
+                            </el-button>
+                        </el-col>
+                    </el-row>
+                </div>
+
+
+                <el-table :data="deptList" row-key="deptId" :default-expand-all="isExpandAll"
+                          :tree-props="{children: 'children', hasChildren: 'hasChildren'}" class="tableBox"
+                          :header-cell-style="{'text-align':'center'}"
+                          :cell-style="{'text-align':'center'}">
+                    <el-table-column prop="deptName" label="部门名称" width="260" align="left"></el-table-column>
+                    <el-table-column prop="orderNum" label="排序" width="200" align="center"></el-table-column>
+                    <el-table-column prop="status" label="状态" width="100" align="center">
+
+                    </el-table-column>
+                    <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+                        <template slot-scope="scope" align="center">
+                            <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改
+                            </el-button>
+                            <el-button size="mini" type="text" icon="el-icon-plus" @click="handleAdd(scope.row)">新增
+                            </el-button>
+                            <el-button v-if="scope.row.parentId != 0" size="mini" type="text" icon="el-icon-delete"
+                                       @click="handleDelete(scope.row)">删除
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+
+            <!--新增用户-->
+            <el-dialog title="新增部门" :visible.sync="addFormVisible">
+                <el-form :model="form" :rules="rules" ref="form" size="small">
+                    <el-form-item label="上级部门" :label-width="labelWidth" prop="parentId">
+                        <treeselect :multiple="false" :options="deptTree" placeholder="请选择部门" v-model="form.parentId"/>
+                    </el-form-item>
+                    <el-form-item label="部门名称" :label-width="labelWidth" prop="deptName">
+                        <el-input v-model="form.deptName" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="部门领导" :label-width="labelWidth" prop="leader">
+                        <el-input v-model="form.leader" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="手机号码" :label-width="labelWidth" prop="phone">
+                        <el-input v-model="form.phone" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="电子邮件" :label-width="labelWidth" prop="email">
+                        <el-input v-model="form.email" :label-width="labelWidth"></el-input>
+                    </el-form-item>
+                    <el-form-item label="排序编号" :label-width="labelWidth" prop="orderNum">
+                        <el-input v-model="form.orderNum" autocomplete="off"></el-input>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="addFormVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="submitAddForm">确 定</el-button>
+                </div>
+            </el-dialog>
+        </div>
+        <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+        <script src="../../plugins/vue/vue.js"></script>
+        <!-- 引入组件库 -->
+        <script src="../../plugins/element-ui/index.js"></script>
+        <script src="../../plugins/treeselect/treeselect.min.js"></script>
+        <!-- 引入axios -->
+        <script src="../../plugins/axios/axios.min.js"></script>
+        <script src="../../js/request.js"></script>
+        <script src="../../api/dept.js"></script>
+        <script src="../../js/validate.js"></script>
+        <script>
+            Vue.component('treeselect', VueTreeselect.Treeselect);
+            new Vue({
+                el: '#user-app',
+                data() {
+                    return {
+                        isExpandAll: true,
+                        addFormVisible: false, // 添加用户表单可见性
+                        form: {
+                            deptId: null, // 部门编号
+                            parentId: null, // 上级部门编号
+                            ancestors: null, // 祖先
+                            deptName: null, //部门名称
+                            orderNum: null, // 排序编号
+                            leader: null, // 部门领导
+                            email: null,  // 电子邮件
+                            phone: null, //手机号码
+                            status: null, //状态（0正常，1停用）
+                        },
+                        labelWidth: '100px',
+                        queryParams: {
+                            deptName: null,
+                            status: null
+                        },
+                        showSearch: true,
+                        deptList: [],   //树形表格
+                        deptTree: null //树形下拉框
+                    }
+                },
+                computed: {
+                    rules() {
+                        return {
+                            parentId: [{required: true, message: '请选择部门编号', trigger: 'blur'}],
+                            deptName: [{required: true, message: '请输入部门名称', trigger: 'blur'}],
+                            orderNum: [{required: true, message: '请输入排序编号', trigger: 'blur'}],
+                            email: [
+                                {required: true, message: '请输入电子邮件', trigger: 'blur'},
+                                {validator: checkEmail, trigger: 'blur'}
+                            ],
+                            phone: [
+                                {required: true, message: '请输入手机号', trigger: 'blur'},
+                                {validator: checkPhone, trigger: 'blur'}
+                            ],
+                            leader: [{required: true, message: '请输入部门领导', trigger: 'blur'}]
+                        }
+                    }
+                },
+                created() {
+                    this.init()
+                    this.user = JSON.parse(localStorage.getItem('userInfo')).username
+                },
+                mounted() {
+                },
+                methods: {
+                    async init() {
+                        const params = {
+                            deptId: 0
+                        }
+
+                        await getDeptTree(params).then(res => {
+                            this.deptTree = res.data;
+                        }).catch(err => {
+                            this.$message.error('请求出错了：' + err)
+                        })
+                    },
+                    handleQuery() {
+                        this.page = 1;
+                        getDeptList(this.queryParams).then(res => {
+                            this.deptList = res.data;
+                        }).catch(err => {
+                            this.$message.error('请求出错了：' + err)
+                        })
+                    },
+                    /** 重置按钮操作 */
+                    resetQuery() {
+                        this.$refs['queryForm'].resetFields();
+                        this.handleQuery();
+                    },
+                    handleUpdate(row) {
+
+                    },
+                    handleAdd(row) {
+                        this.addFormVisible = true;
+                    },
+                    handleDelete(row) {
+
+                    },
+                    // 添加
+                    submitAddForm() {
+                        this.$refs["form"].validate((valid) => {
+                            if (valid) {
+                                addDept(this.form).then(res => {
+
+                                }).catch(err => {
+                                    this.$message.error("请求出错了：" + err);
+                                });
+                                this.addFormVisible = false;
+                            }
+                        });
+                    },
+                    //状态修改
+                    statusHandle(row) {
+                        this.id = row.id
+                        this.status = row.status
+                        this.$confirm('确认调整该账号的状态?', '提示', {
+                            'confirmButtonText': '确定',
+                            'cancelButtonText': '取消',
+                            'type': 'warning'
+                        }).then(() => {
+                            enableOrDisableEmployee({'id': this.id, 'status': !this.status ? 1 : 0}).then(res => {
+                                console.log('enableOrDisableEmployee', res)
+                                if (String(res.code) === '1') {
+                                    this.$message.success('账号状态更改成功！')
+                                    this.handleQuery()
+                                }
+                            }).catch(err => {
+                                this.$message.error('请求出错了：' + err)
+                            })
+                        })
+                    },
+                    handleSizeChange(val) {
+                        this.pageSize = val
+                        this.init()
+                    },
+                    handleCurrentChange(val) {
+                        this.page = val
+                        this.init()
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>

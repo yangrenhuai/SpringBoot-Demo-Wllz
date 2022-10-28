@@ -58,6 +58,7 @@ public class UserController {
             return AjaxResult.error("验证码错误");
         }
         ajax.put("data",user);
+        request.getSession().setAttribute("User",user);
         return ajax;
     }
 

@@ -48,6 +48,15 @@ function checkPhone (rule, value, callback){
   }
 }
 
+function checkEmail(rule,value,callback){
+  if (!/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(\.[a-zA-Z0-9_-])+/.test(value)) {
+    callback(new Error("请输入正确的电子邮件!"))
+  }
+  else{
+    callback();
+  }
+}
+
 
 function validID (rule,value,callback) {
   // 身份证号码为15位或者18位，15位时全为数字，18位前17位为数字，最后一位是校验位，可能为数字或字符X

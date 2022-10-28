@@ -1,20 +1,14 @@
-package cn.edu.svtcc.entity;
+package cn.edu.svtcc.entity.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import java.util.List;
 
-public class Dept extends BaseEntity{
-    @TableId(type= IdType.AUTO)
+public class DeptTableVO {
     private Long deptId;
-
     /**
      * 上级部门Id
      */
     private Long parentId;
-    /**
-     * 祖先
-     */
-    private String ancestors;
+
     /**
      * 部门名称
      */
@@ -39,6 +33,7 @@ public class Dept extends BaseEntity{
      * 状态，默认值为0，0-正常，1-停用
      */
     private String status;
+    private List<DeptTableVO> children;
 
     public Long getDeptId() {
         return deptId;
@@ -54,14 +49,6 @@ public class Dept extends BaseEntity{
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
-    }
-
-    public String getAncestors() {
-        return ancestors;
-    }
-
-    public void setAncestors(String ancestors) {
-        this.ancestors = ancestors;
     }
 
     public String getDeptName() {
@@ -112,18 +99,26 @@ public class Dept extends BaseEntity{
         this.status = status;
     }
 
+    public List<DeptTableVO> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<DeptTableVO> children) {
+        this.children = children;
+    }
+
     @Override
     public String toString() {
-        return "Dept{" +
+        return "DeptTableVO{" +
                 "deptId=" + deptId +
                 ", parentId=" + parentId +
-                ", ancestors='" + ancestors + '\'' +
                 ", deptName='" + deptName + '\'' +
                 ", orderNum=" + orderNum +
                 ", leader='" + leader + '\'' +
                 ", phone='" + phone + '\'' +
                 ", email='" + email + '\'' +
                 ", status='" + status + '\'' +
+                ", children=" + children +
                 '}';
     }
 }
