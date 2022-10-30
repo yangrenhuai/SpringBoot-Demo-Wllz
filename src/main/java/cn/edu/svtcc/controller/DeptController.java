@@ -27,12 +27,41 @@ public class DeptController {
         AjaxResult ajax=AjaxResult.success();
 
         dept.setStatus("0");
-        dept.setCreateBy(((User)request.getSession()).getUserName());
+        dept.setCreateBy(((User)request.getSession().getAttribute("User")).getUserName());
         dept.setCreateTime(new Date());
-        dept.setUpdateBy(((User)request.getSession()).getUserName());
+        dept.setUpdateBy(((User)request.getSession().getAttribute("User")).getUserName());
         dept.setUpdateTime(new Date());
 
+        if(dept.getParentId()==0){
+            dept.setAncestors("0");
+        }
+        else {
+            Dept parentDept=deptService.getById(dept.getParentId());
+            dept.setAncestors(parentDept.getAncestors()+","+parentDept.getDeptId());
+        }
+
         deptService.save(dept);
+
+        return ajax;
+    }
+
+    @PutMapping
+    public AjaxResult update(@RequestBody Dept dept,HttpServletRequest request){
+        AjaxResult ajax=AjaxResult.success();
+
+        dept.setUpdateBy(((User)request.getSession().getAttribute("User")).getUserName());
+        dept.setUpdateTime(new Date());
+
+        // 更新ancestors
+        if(dept.getParentId()==0){
+            dept.setAncestors("0");
+        }
+        else {
+            Dept parentDept=deptService.getById(dept.getParentId());
+            dept.setAncestors(parentDept.getAncestors()+","+parentDept.getDeptId());
+        }
+
+        deptService.updateById(dept);
 
         return ajax;
     }
@@ -69,7 +98,24 @@ public class DeptController {
         return ajax;
     }
 
-    public List<DeptTreeVO> toSelectTree(List<Dept> deptList, Long parentId){
+    @GetMapping("/{deptId}")
+    public AjaxResult getDeptById(@PathVariable Long deptId){
+        AjaxResult ajax=AjaxResult.success();
+        Dept dept = deptService.getById(deptId);
+        ajax.put("data",dept);
+        return ajax;
+    }
+
+    @DeleteMapping("/{deptId}")
+    public AjaxResult deleteDept(@PathVariable Long deptId){
+        log.info(deptId.toString());
+        AjaxResult ajax=AjaxResult.success();
+        deptService.removeById(deptId);
+
+        return  ajax;
+    }
+
+    private List<DeptTreeVO> toSelectTree(List<Dept> deptList, Long parentId){
         List<Dept> list1=new ArrayList<>();
 
         for(Dept dept:deptList){
@@ -93,7 +139,7 @@ public class DeptController {
         return treeList;
     }
 
-    public List<DeptTableVO> toTableTree(List<Dept> deptList, Long parentId){
+    private List<DeptTableVO> toTableTree(List<Dept> deptList, Long parentId){
         List<Dept> list1=new ArrayList<>();
 
         for(Dept dept:deptList){
@@ -112,6 +158,7 @@ public class DeptController {
             vo.setOrderNum(dept.getOrderNum());
             vo.setPhone(dept.getPhone());
             vo.setParentId(dept.getParentId());
+            vo.setStatus(dept.getStatus());
 
             List<DeptTableVO> children=toTableTree(deptList,dept.getDeptId());
             if(children==null || children.size()==0)

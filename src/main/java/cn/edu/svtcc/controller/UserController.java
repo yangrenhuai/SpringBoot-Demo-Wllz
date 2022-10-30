@@ -66,6 +66,7 @@ public class UserController {
     public AjaxResult logout(HttpServletRequest request){
         AjaxResult ajax=AjaxResult.success();
         request.getSession().removeAttribute(Constants.CAPTCHA_CODE_SESSION_KEY);
+        request.getSession().removeAttribute("User");
         return ajax;
     }
 

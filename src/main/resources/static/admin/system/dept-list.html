@@ -52,18 +52,24 @@
                           :tree-props="{children: 'children', hasChildren: 'hasChildren'}" class="tableBox"
                           :header-cell-style="{'text-align':'center'}"
                           :cell-style="{'text-align':'center'}">
-                    <el-table-column prop="deptName" label="部门名称" width="260" align="left"></el-table-column>
-                    <el-table-column prop="orderNum" label="排序" width="200" align="center"></el-table-column>
-                    <el-table-column prop="status" label="状态" width="100" align="center">
-
+                    <el-table-column prop="deptName" label="部门名称" align="left"></el-table-column>
+                    <el-table-column prop="leader" label="部门领导"  align="left"></el-table-column>
+                    <el-table-column prop="phone" label="手机号码"  align="left"></el-table-column>
+                    <el-table-column prop="email" label="电子邮件"  align="left"></el-table-column>
+                    <el-table-column prop="status" label="状态"  align="center">
+                        <template slot-scope="scope">
+                            <el-tag v-if="scope.row.status=='0'" type="success">正常</el-tag>
+                            <el-tag v-else type="danger">停用</el-tag>
+                        </template>
                     </el-table-column>
-                    <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+                    <el-table-column prop="orderNum" label="排序" align="center"></el-table-column>
+                    <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
                         <template slot-scope="scope" align="center">
                             <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改
                             </el-button>
                             <el-button size="mini" type="text" icon="el-icon-plus" @click="handleAdd(scope.row)">新增
                             </el-button>
-                            <el-button v-if="scope.row.parentId != 0" size="mini" type="text" icon="el-icon-delete"
+                            <el-button size="mini" type="text" icon="el-icon-delete"
                                        @click="handleDelete(scope.row)">删除
                             </el-button>
                         </template>
@@ -71,8 +77,8 @@
                 </el-table>
             </div>
 
-            <!--新增用户-->
-            <el-dialog title="新增部门" :visible.sync="addFormVisible">
+            <!--新增修改部门-->
+            <el-dialog :title="dialogTitle" :visible.sync="formVisible">
                 <el-form :model="form" :rules="rules" ref="form" size="small">
                     <el-form-item label="上级部门" :label-width="labelWidth" prop="parentId">
                         <treeselect :multiple="false" :options="deptTree" placeholder="请选择部门" v-model="form.parentId"/>
@@ -94,8 +100,8 @@
                     </el-form-item>
                 </el-form>
                 <div slot="footer" class="dialog-footer">
-                    <el-button @click="addFormVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="submitAddForm">确 定</el-button>
+                    <el-button @click="formVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="handleSubmit">确 定</el-button>
                 </div>
             </el-dialog>
         </div>
@@ -116,7 +122,9 @@
                 data() {
                     return {
                         isExpandAll: true,
-                        addFormVisible: false, // 添加用户表单可见性
+                        formVisible: false, // 添加用户表单可见性
+                        action:'add',
+                        dialogTitle:'新增部门',
                         form: {
                             deptId: null, // 部门编号
                             parentId: null, // 上级部门编号
@@ -168,7 +176,13 @@
                             deptId: 0
                         }
 
-                        await getDeptTree(params).then(res => {
+                        getDeptList(this.queryParams).then(res => {
+                            this.deptList = res.data;
+                        }).catch(err => {
+                            this.$message.error('请求出错了：' + err)
+                        })
+
+                        getDeptTree(params).then(res => {
                             this.deptTree = res.data;
                         }).catch(err => {
                             this.$message.error('请求出错了：' + err)
@@ -188,26 +202,72 @@
                         this.handleQuery();
                     },
                     handleUpdate(row) {
-
+                        this.formVisible=true;
+                        this.action='update';
+                        this.dialogTitle="修改部门";
+                        this.form.deptId=row.deptId;
+                        getDeptById(row.deptId).then(res=>{
+                            this.form=res.data;
+                        });
                     },
                     handleAdd(row) {
-                        this.addFormVisible = true;
+                        this.formVisible = true;
+                        this.action='add';
+                        this.dialogTitle="新增部门";
+                        if(row!=undefined){
+                            this.form.parentId=row.deptId;
+                        }
                     },
                     handleDelete(row) {
+                        this.$confirm('是否确认删除名称为"' + row.deptName + '"的数据项？').then(function() {
+                            return deleteDept(row.deptId);
+                        }).then(() => {
+                            getDeptList(this.queryParams).then(res => {
+                                this.deptList = res.data;
+                            }).catch(err => {
+                                this.$message.error('请求出错了：' + err)
+                            })
 
+                            this.$message.success("删除成功");
+                        }).catch(() => {});
                     },
-                    // 添加
-                    submitAddForm() {
-                        this.$refs["form"].validate((valid) => {
-                            if (valid) {
-                                addDept(this.form).then(res => {
+                    // 提交
+                    handleSubmit() {
+                        if(this.action=="add") {
+                            this.$refs["form"].validate((valid) => {
+                                if (valid) {
+                                    addDept(this.form).then(res => {
+                                        getDeptList(this.queryParams).then(res => {
+                                            this.deptList = res.data;
+                                        }).catch(err => {
+                                            this.$message.error('请求出错了：' + err)
+                                        })
+                                    }).catch(err => {
+                                        this.$message.error("请求出错了：" + err);
+                                    });
+                                    this.formVisible = false;
+                                }
+                            });
+                        }
+                        if(this.action=="update"){
+                            this.$refs["form"].validate((valid) => {
+                                if (valid) {
+                                    updateDept(this.form).then(res => {
+                                        getDeptList(this.queryParams).then(res => {
+                                            this.deptList = res.data;
+                                        }).catch(err => {
+                                            this.$message.error('请求出错了：' + err)
+                                        })
+                                    }).catch(err => {
+                                        this.$message.error("请求出错了：" + err);
+                                    });
+                                    this.formVisible = false;
+                                }
+                            });
+                        }
+                        if(this.action="delete"){
 
-                                }).catch(err => {
-                                    this.$message.error("请求出错了：" + err);
-                                });
-                                this.addFormVisible = false;
-                            }
-                        });
+                        }
                     },
                     //状态修改
                     statusHandle(row) {
@@ -228,14 +288,6 @@
                                 this.$message.error('请求出错了：' + err)
                             })
                         })
-                    },
-                    handleSizeChange(val) {
-                        this.pageSize = val
-                        this.init()
-                    },
-                    handleCurrentChange(val) {
-                        this.page = val
-                        this.init()
                     }
                 }
             })

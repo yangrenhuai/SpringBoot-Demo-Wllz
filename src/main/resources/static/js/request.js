@@ -39,9 +39,10 @@
 
   // 响应拦截器
   service.interceptors.response.use(res => {
-      if (res.data.code === 0 && res.data.msg === 'NOTLOGIN') {// 返回登录页面
+      console.log(res);
+      if (res.data.code === 500 && res.data.msg === 'NOTLOGIN') {// 返回登录页面
         localStorage.removeItem('userInfo')
-        window.top.location.href = '/login.html'
+        window.top.location.href = 'login.html'
       } else {
         return res.data
       }

@@ -1,5 +1,6 @@
 package cn.edu.svtcc.entity;
 
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serializable;
@@ -20,6 +21,18 @@ public class BaseEntity implements Serializable {
 
     /** 备注 */
     private String remark;
+
+    /** 逻辑删除 */
+    @TableLogic
+    private String delFlag;
+
+    public String getDelFlag() {
+        return delFlag;
+    }
+
+    public void setDelFlag(String delFlag) {
+        this.delFlag = delFlag;
+    }
 
     public String getCreateBy() {
         return createBy;
