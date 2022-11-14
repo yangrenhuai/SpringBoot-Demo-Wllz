@@ -4,30 +4,29 @@
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>网络理政系统-部门管理</title>
+        <title>网络理政系统-投诉管理</title>
         <!-- 引入样式 -->
         <link rel="stylesheet" href="../../plugins/element-ui/index.css"/>
-        <link rel="stylesheet" href="../../plugins/treeselect/treeselect.min.css">
         <link rel="stylesheet" href="../../styles/common.css"/>
         <link rel="stylesheet" href="../../styles/page.css"/>
 
         <style>
-            #user-app .notAdmin::after {
+            #complaint-app .notAdmin::after {
                 border: 0 !important;
             }
         </style>
     </head>
     <body>
-        <div class="dashboard-container" id="user-app">
+        <div class="dashboard-container" id="complaint-app">
             <div class="container">
                 <div class="tableBar">
-                    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true">
-                        <el-form-item label="部门名称" prop="deptName">
-                            <el-input v-model="queryParams.deptName" placeholder="请输入部门名称" clearable
-                                      @keyup.enter.native="handleQuery"/>
+                    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch">
+                        <el-form-item label="投诉时间" prop="complaintTime">
+                            <el-date-picker v-model="queryParams.complaintTime" type="daterange" range-separator="至"
+                                            start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
                         </el-form-item>
                         <el-form-item label="状态" prop="status">
-                            <el-select v-model="queryParams.status" placeholder="部门状态" clearable>
+                            <el-select v-model="queryParams.status" placeholder="投诉状态" clearable>
                                 <el-option key="0" label="正常" value="0"></el-option>
                                 <el-option key="1" label="停用" value="1"></el-option>
                             </el-select>
@@ -47,20 +46,42 @@
                     </el-row>
                 </div>
 
-
-                <el-table :data="deptList" row-key="deptId" :default-expand-all="isExpandAll"
-                          :tree-props="{children: 'children', hasChildren: 'hasChildren'}" class="tableBox">
-                    <el-table-column prop="deptName" label="部门名称" align="left"></el-table-column>
-                    <el-table-column prop="leader" label="部门领导"  align="left"></el-table-column>
-                    <el-table-column prop="phone" label="手机号码"  align="left"></el-table-column>
-                    <el-table-column prop="email" label="电子邮件"  align="left"></el-table-column>
-                    <el-table-column prop="status" label="状态"  align="center">
+                <el-table :data="complaintList" style="width: 100%">
+                    <el-table-column align="center" type="selection" width="45"/>
+                    <el-table-column align="center" label="来话人" prop="complainant" width="65"/>
+                    <el-table-column align="center" label="联系方式" prop="phonenumber"/>
+                    <el-table-column align="center" label="数据来源" prop="sourceType">
                         <template slot-scope="scope">
-                            <el-tag v-if="scope.row.status=='0'" type="success">正常</el-tag>
-                            <el-tag v-else type="danger">停用</el-tag>
+<!--                            <dict-tag :options="dict.type.sys_complaint_type" :value="scope.row.sourceType"/>-->
                         </template>
                     </el-table-column>
-                    <el-table-column prop="orderNum" label="排序" align="center"></el-table-column>
+                    <el-table-column align="center" label="内容分类" prop="contentType">
+                        <template slot-scope="scope">
+<!--                            <dict-tag :options="dict.type.sys_content_type" :value="scope.row.contentType"/>-->
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" label="投诉日期" prop="complaintTime" sortable/>
+                    <el-table-column align="center" label="办理期限" prop="limitTime" sortable>
+                        <template slot-scope="scope">
+                            <el-badge v-if="(new Date(scope.row.limitTime)-new Date()<60*1000*60*48) && scope.row.handlerStatus=='1'" is-dot style="margin-top:4px">
+                                {{scope.row.limitTime|date}}
+                            </el-badge>
+                            <div v-else>{{scope.row.limitTime|date}}</div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" label="办理日期" prop="processTime" sortable>
+                        <template slot-scope="scope">
+                            {{scope.row.processTime|date}}
+                        </template>
+                    </el-table-column>
+                    <el-table-column align="center" label="办理民警" prop="nickName" width="75"/>
+
+
+                    <el-table-column align="center" label="状态" prop="" width="68">
+                        <template slot-scope="scope">
+<!--                            <dict-tag :options="dict.type.sys_complain_status" :value="scope.row.handlerStatus"/>-->
+                        </template>
+                    </el-table-column>
                     <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
                         <template slot-scope="scope" align="center">
                             <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改
@@ -75,16 +96,16 @@
                 </el-table>
             </div>
 
-            <!--新增修改部门-->
+            <!--新增修改投诉-->
             <el-dialog :title="dialogTitle" :visible.sync="formVisible">
                 <el-form :model="form" :rules="rules" ref="form" size="small">
                     <el-form-item label="上级部门" :label-width="labelWidth" prop="parentId">
-                        <treeselect :multiple="false" :options="deptTree" placeholder="请选择部门" v-model="form.parentId"/>
+                        <treeselect :multiple="false" :options="deptTree" placeholder="请选择投诉" v-model="form.parentId"/>
                     </el-form-item>
-                    <el-form-item label="部门名称" :label-width="labelWidth" prop="deptName">
+                    <el-form-item label="投诉名称" :label-width="labelWidth" prop="deptName">
                         <el-input v-model="form.deptName" autocomplete="off"></el-input>
                     </el-form-item>
-                    <el-form-item label="部门领导" :label-width="labelWidth" prop="leader">
+                    <el-form-item label="投诉领导" :label-width="labelWidth" prop="leader">
                         <el-input v-model="form.leader" autocomplete="off"></el-input>
                     </el-form-item>
                     <el-form-item label="手机号码" :label-width="labelWidth" prop="phone">
@@ -114,40 +135,58 @@
         <script src="../../api/dept.js"></script>
         <script src="../../js/validate.js"></script>
         <script>
-            Vue.component('treeselect', VueTreeselect.Treeselect);
+            //自定义全局过滤器，将时间戳显示成年月日
+            Vue.filter('date',data=>{
+                let d = new Date(data);
+                if(d.getFullYear()===1970) return "-";
+                var year=d.getFullYear();
+                var month;
+                if(d.getMonth()+1<10)
+                    month='0'+(d.getMonth()+1)
+                else
+                    month=d.getMonth()+1;
+                var day;
+                if(d.getDate()<10)
+                    day='0'+(d.getDate())
+                else
+                    day=d.getDate();
+                return year+'-'+month+'-'+day;
+            });
+
             new Vue({
-                el: '#user-app',
+                el: '#complaint-app',
                 data() {
                     return {
                         isExpandAll: true,
                         formVisible: false, // 添加用户表单可见性
                         action:'add',
-                        dialogTitle:'新增部门',
+                        dialogTitle:'新增投诉',
                         form: {
-                            deptId: null, // 部门编号
-                            parentId: null, // 上级部门编号
+                            deptId: null, // 投诉编号
+                            parentId: null, // 上级投诉编号
                             ancestors: null, // 祖先
-                            deptName: null, //部门名称
+                            deptName: null, //投诉名称
                             orderNum: null, // 排序编号
-                            leader: null, // 部门领导
+                            leader: null, // 投诉领导
                             email: null,  // 电子邮件
                             phone: null, //手机号码
                             status: null, //状态（0正常，1停用）
                         },
                         labelWidth: '100px',
                         queryParams: {
-                            deptName: null,
+                            complaintTime: [],
                             status: null
                         },
-                        deptList: [],   //树形表格
+                        showSearch: true,
+                        complaintList: [],   //树形表格
                         deptTree: null //树形下拉框
                     }
                 },
                 computed: {
                     rules() {
                         return {
-                            parentId: [{required: true, message: '请选择部门编号', trigger: 'blur'}],
-                            deptName: [{required: true, message: '请输入部门名称', trigger: 'blur'}],
+                            parentId: [{required: true, message: '请选择投诉编号', trigger: 'blur'}],
+                            deptName: [{required: true, message: '请输入投诉名称', trigger: 'blur'}],
                             orderNum: [{required: true, message: '请输入排序编号', trigger: 'blur'}],
                             email: [
                                 {required: true, message: '请输入电子邮件', trigger: 'blur'},
@@ -157,13 +196,13 @@
                                 {required: true, message: '请输入手机号', trigger: 'blur'},
                                 {validator: checkPhone, trigger: 'blur'}
                             ],
-                            leader: [{required: true, message: '请输入部门领导', trigger: 'blur'}]
+                            leader: [{required: true, message: '请输入投诉领导', trigger: 'blur'}]
                         }
                     }
                 },
                 created() {
                     this.init()
-                    // this.user = JSON.parse(localStorage.getItem('userInfo')).username
+                    this.user = JSON.parse(localStorage.getItem('userInfo')).username
                 },
                 mounted() {
                 },
@@ -173,13 +212,13 @@
                             deptId: 0
                         }
 
-                        getDeptList(this.queryParams).then(res => {
-                            this.deptList = res.data;
+                        getComplaintList(this.queryParams).then(res => {
+                            this.complaintList = res.data;
                         }).catch(err => {
                             this.$message.error('请求出错了：' + err)
                         })
 
-                        getDeptTree(params).then(res => {
+                        getComplaintTree(params).then(res => {
                             this.deptTree = res.data;
                         }).catch(err => {
                             this.$message.error('请求出错了：' + err)
@@ -187,8 +226,8 @@
                     },
                     handleQuery() {
                         this.page = 1;
-                        getDeptList(this.queryParams).then(res => {
-                            this.deptList = res.data;
+                        getComplaintList(this.queryParams).then(res => {
+                            this.complaintList = res.data;
                         }).catch(err => {
                             this.$message.error('请求出错了：' + err)
                         })
@@ -201,26 +240,26 @@
                     handleUpdate(row) {
                         this.formVisible=true;
                         this.action='update';
-                        this.dialogTitle="修改部门";
+                        this.dialogTitle="修改投诉";
                         this.form.deptId=row.deptId;
-                        getDeptById(row.deptId).then(res=>{
+                        getComplaintById(row.deptId).then(res=>{
                             this.form=res.data;
                         });
                     },
                     handleAdd(row) {
                         this.formVisible = true;
                         this.action='add';
-                        this.dialogTitle="新增部门";
+                        this.dialogTitle="新增投诉";
                         if(row!=undefined){
                             this.form.parentId=row.deptId;
                         }
                     },
                     handleDelete(row) {
                         this.$confirm('是否确认删除名称为"' + row.deptName + '"的数据项？').then(function() {
-                            return deleteDept(row.deptId);
+                            return deleteComplaint(row.deptId);
                         }).then(() => {
-                            getDeptList(this.queryParams).then(res => {
-                                this.deptList = res.data;
+                            getComplaintList(this.queryParams).then(res => {
+                                this.complaintList = res.data;
                             }).catch(err => {
                                 this.$message.error('请求出错了：' + err)
                             })
@@ -233,9 +272,9 @@
                         if(this.action=="add") {
                             this.$refs["form"].validate((valid) => {
                                 if (valid) {
-                                    addDept(this.form).then(res => {
-                                        getDeptList(this.queryParams).then(res => {
-                                            this.deptList = res.data;
+                                    addComplaint(this.form).then(res => {
+                                        getComplaintList(this.queryParams).then(res => {
+                                            this.complaintList = res.data;
                                         }).catch(err => {
                                             this.$message.error('请求出错了：' + err)
                                         })
@@ -249,9 +288,9 @@
                         if(this.action=="update"){
                             this.$refs["form"].validate((valid) => {
                                 if (valid) {
-                                    updateDept(this.form).then(res => {
-                                        getDeptList(this.queryParams).then(res => {
-                                            this.deptList = res.data;
+                                    updateComplaint(this.form).then(res => {
+                                        getComplaintList(this.queryParams).then(res => {
+                                            this.complaintList = res.data;
                                         }).catch(err => {
                                             this.$message.error('请求出错了：' + err)
                                         })

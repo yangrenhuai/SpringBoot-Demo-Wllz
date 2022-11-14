@@ -42,7 +42,7 @@
       console.log(res);
       if (res.data.code === 500 && res.data.msg === 'NOTLOGIN') {// 返回登录页面
         localStorage.removeItem('userInfo')
-        window.top.location.href = 'login.html'
+        window.top.location.href = '/wllz/login.html'
       } else {
         return res.data
       }

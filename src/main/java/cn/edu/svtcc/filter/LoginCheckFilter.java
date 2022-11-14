@@ -25,17 +25,18 @@ public class LoginCheckFilter implements Filter {
         String uri=req.getRequestURI();
 
         String[] urls={
-                "/wllz/user/login",
-                "/wllz/user/logout",
-                "/wllz/captchaImage",
-                "/wllz/admin/**",
-                "/wllz/js/**",
-                "/wllz/api/**",
-                "/wllz/images/**",
-                "/wllz/plugins/**",
-                "/wllz/styles/**",
-                "/wllz/login.html",
+                "/*/user/login",
+                "/*/user/logout",
+                "/*/captchaImage",
+                "/*/admin/**",
+                "/*/js/**",
+                "/*/api/**",
+                "/*/images/**",
+                "/*/plugins/**",
+                "/*/styles/**",
+                "/*/login.html",
         };
+        log.info(uri);
         boolean check=check(urls,uri);
         // 检查是否需要放行
         if(check){

@@ -77,8 +77,6 @@ public class DeptController {
         List<Dept> deptList=deptService.selectDeptList(dept);
         List<DeptTableVO> treeList=toTableTree(deptList,0L);
 
-        log.info(treeList.toString());
-
         ajax.put("data",treeList);
         return ajax;
     }
@@ -107,7 +105,7 @@ public class DeptController {
     }
 
     @DeleteMapping("/{deptId}")
-    public AjaxResult deleteDept(@PathVariable Long deptId){
+    public AjaxResult delete(@PathVariable Long deptId){
         log.info(deptId.toString());
         AjaxResult ajax=AjaxResult.success();
         deptService.removeById(deptId);
@@ -119,7 +117,7 @@ public class DeptController {
         List<Dept> list1=new ArrayList<>();
 
         for(Dept dept:deptList){
-            if(dept.getParentId()==parentId) list1.add(dept);
+            if(dept.getParentId().equals(parentId)) list1.add(dept);
         }
 
         if(list1.size()<0) return null;
@@ -143,10 +141,10 @@ public class DeptController {
         List<Dept> list1=new ArrayList<>();
 
         for(Dept dept:deptList){
-            if(dept.getParentId()==parentId) list1.add(dept);
+            if(dept.getParentId().equals(parentId)) list1.add(dept);
         }
 
-        if(list1.size()<0) return null;
+        if(list1.size()<=0) return null;
 
         List<DeptTableVO> treeList =new ArrayList<>();
         for(Dept dept:list1){
