@@ -36,7 +36,7 @@ function editUser (params) {
 // 修改页面反查详情接口
 function queryUserById (id) {
   return $axios({
-    url: `/employee/${id}`,
+    url: `/user/${id}`,
     method: 'get'
   })
 }

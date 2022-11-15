@@ -48,9 +48,9 @@
 
 
                 <el-table :data="userList" row-key="userId" class="tableBox">
-                    <el-table-column prop="deptName" label="用户名称" align="left"></el-table-column>
-                    <el-table-column prop="leader" label="用户领导"  align="left"></el-table-column>
-                    <el-table-column prop="phone" label="手机号码"  align="left"></el-table-column>
+                    <el-table-column prop="userName" label="用户名称" align="left"></el-table-column>
+                    <el-table-column prop="realName" label="真实姓名"  align="left"></el-table-column>
+                    <el-table-column prop="phonenumber" label="手机号码"  align="left"></el-table-column>
                     <el-table-column prop="email" label="电子邮件"  align="left"></el-table-column>
                     <el-table-column prop="status" label="状态"  align="center">
                         <template slot-scope="scope">
@@ -58,7 +58,7 @@
                             <el-tag v-else type="danger">停用</el-tag>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="orderNum" label="排序" align="center"></el-table-column>
+                    <el-table-column prop="createTime" label="创建时间" align="center"></el-table-column>
                     <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
                         <template slot-scope="scope" align="center">
                             <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改
@@ -82,7 +82,7 @@
                     <el-form-item label="用户名称" :label-width="labelWidth" prop="deptName">
                         <el-input v-model="form.deptName" autocomplete="off"></el-input>
                     </el-form-item>
-                    <el-form-item label="用户领导" :label-width="labelWidth" prop="leader">
+                    <el-form-item label="真实姓名" :label-width="labelWidth" prop="leader">
                         <el-input v-model="form.leader" autocomplete="off"></el-input>
                     </el-form-item>
                     <el-form-item label="手机号码" :label-width="labelWidth" prop="phone">
@@ -131,10 +131,12 @@
                         },
                         labelWidth: '100px',
                         queryParams: {
-                            deptName: null,
-                            status: null
+                            userName: null,
+                            status: null,
+                            page:1,
+                            pageSize:10
                         },
-                        userList: [],   //树形表格
+                        userList: [],   //用户列表
                     }
                 },
                 computed: {
@@ -168,7 +170,7 @@
                         }
 
                         getUserList(this.queryParams).then(res => {
-                            this.userList = res.data;
+                            this.userList = res.data.records;
                         }).catch(err => {
                             this.$message.error('请求出错了：' + err)
                         })
@@ -182,7 +184,7 @@
                     handleQuery() {
                         this.page = 1;
                         getUserList(this.queryParams).then(res => {
-                            this.userList = res.data;
+                            this.userList = res.data.records;
                         }).catch(err => {
                             this.$message.error('请求出错了：' + err)
                         })
