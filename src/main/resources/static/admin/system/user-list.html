@@ -58,12 +58,18 @@
                             <el-tag v-else type="danger">停用</el-tag>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="createTime" label="创建时间" align="center"></el-table-column>
+                    <el-table-column prop="createTime" label="创建时间" align="center">
+                        <template slot-scope="scope" align="center">
+                            {{ scope.row.createTime|datetime }}
+                        </template>
+                    </el-table-column>
                     <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
                         <template slot-scope="scope" align="center">
                             <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改
                             </el-button>
-                            <el-button size="mini" type="text" icon="el-icon-plus" @click="handleAdd(scope.row)">新增
+                            <el-button size="mini" type="text" :icon="scope.row.status=='0'?'el-icon-video-pause':'el-icon-video-play'"
+                                       @click="handleAdd(scope.row)">
+                                {{scope.row.status=='0'?'停用':'启用'}}
                             </el-button>
                             <el-button size="mini" type="text" icon="el-icon-delete"
                                        @click="handleDelete(scope.row)">删除
@@ -110,6 +116,7 @@
         <script src="../../js/request.js"></script>
         <script src="../../api/user.js"></script>
         <script src="../../js/validate.js"></script>
+        <script src="../../js/common.js"></script>
         <script>
             new Vue({
                 el: '#user-app',
@@ -120,14 +127,16 @@
                         dialogTitle:'新增用户',
                         form: {
                             userId: null, // 用户编号
-                            parentId: null, // 上级用户编号
-                            ancestors: null, // 祖先
-                            deptName: null, //用户名称
-                            orderNum: null, // 排序编号
-                            leader: null, // 用户领导
-                            email: null,  // 电子邮件
-                            phone: null, //手机号码
-                            status: null, //状态（0正常，1停用）
+                            deptId: null, // 部门编号
+                            userName: null, // 用户名
+                            realName: null, //真实i姓名
+                            email: null, // 电子右键
+                            phonenumber: null, // 手机号码
+                            sex: null,  // 性别
+                            avatar: null, //头像
+                            password:null, //密码
+                            status: null, //状态（0正常，1停用）,
+                            remark:null // 备注
                         },
                         labelWidth: '100px',
                         queryParams: {
@@ -142,14 +151,14 @@
                 computed: {
                     rules() {
                         return {
-                            parentId: [{required: true, message: '请选择用户编号', trigger: 'blur'}],
-                            deptName: [{required: true, message: '请输入用户名称', trigger: 'blur'}],
-                            orderNum: [{required: true, message: '请输入排序编号', trigger: 'blur'}],
+                            deptId: [{required: true, message: '请选择部门', trigger: 'blur'}],
+                            userName: [{required: true, message: '请填写用户名', trigger: 'blur'}],
+                            realName: [{required: true, message: '请填写真实姓名', trigger: 'blur'}],
                             email: [
                                 {required: true, message: '请输入电子邮件', trigger: 'blur'},
                                 {validator: checkEmail, trigger: 'blur'}
                             ],
-                            phone: [
+                            phonenumber: [
                                 {required: true, message: '请输入手机号', trigger: 'blur'},
                                 {validator: checkPhone, trigger: 'blur'}
                             ],
